@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-from argparse import ArgumentParser
-import serial
-import time
 import inkex  # import the inkex Module so that we can use the debug function below
 from inkex import Boolean
-from inkex.ports import Serial
+from grbl_sender import GRBLSender
 
 
 class EggBot(inkex.EffectExtension):  #This is your program
@@ -50,15 +47,32 @@ class EggBot(inkex.EffectExtension):  #This is your program
         return self.tab_help()
 
     def tab_connection(self):
-        ser = serial.Serial('/dev/ttyUSB0', 115200)
-        ser.write(str.encode("\r\n\r\n"))
-        time.sleep(2)  # Wait for Printrbot to initialize
-        ser.reset_input_buffer()
-        inkex.utils.debug(ser.readall().decode('utf-8'))
-        time.sleep(1)
-        inkex.utils.debug(ser.readall().decode('utf-8'))
-        ser.close()
-        return
+        sender = GRBLSender('/dev/ttyUSB0', 115200, 1)
+
+        try:
+            # Подключение
+            if not sender.connect():
+                inkex.utils.errormsg("Не удалось подключиться к GRBL")
+                return 1
+
+            status = sender.get_status()
+            inkex.utils.errormsg(f"Статус GRBL: {status}")
+            if not sender.send_gcode_file('test_sample.gcode'):
+                inkex.utils.errormsg("Ошибка при отправке файла")
+                return 1
+
+            inkex.utils.errormsg("Файл успешно отправлен")
+            return 0
+
+        except KeyboardInterrupt:
+            inkex.utils.errormsg("Прервано пользователем")
+            sender.emergency_stop()
+            return 1
+        except Exception as e:
+            inkex.utils.errormsg(f"Неожиданная ошибка: {e}")
+            return 1
+        finally:
+            sender.disconnect()
 
 if __name__ == '__main__':
     EggBot().run()
