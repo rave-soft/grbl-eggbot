@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+<inkscape-extension translationdomain="egg_bot_grbl" xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <name>Control</name>
     <id>org.inkscape.egg-bot-grbl.control</id>
     <effect show-stderr="true" needs-live-preview="false">
@@ -9,21 +9,27 @@
         </effects-menu>
     </effect>
     <param name="tab" type="notebook">
-        <page name="connection" gui-text="Connection">
+        <page name="generate_gcode" gui-text="Generate G-Code">
+            <param name="pen_up_command" type="string" gui-text="Pen Up Command">M3 S50;</param>
+            <param name="pen_down_command" type="string" gui-text="Pen Down Command">M3 S90;</param>
+            <spacer/>
+            <param name="directory" type="path" gui-text="Output Directory" mode="folder">-- Choose Output Directory --</param>
+            <param name="filename" type="string" gui-text="Filename">output.gcode</param>
+            <param name="filename_suffix" type="bool" gui-text="Add Numeric Suffix to Filename">true</param>
+        </page>
+        <page name="print" gui-text="Print G-Code">
             <label xml:space="preserve">
                 USB Port.
             </label>
             <param name="usb_port" type="string" appearance="full" indent="2" gui-text="USB Port">/dev/ttyUSB0</param>
-        </page>
-        <page name="options" gui-text="Options">
-            <param name="color_param" gui-text="Nail Color" type="color">-1</param>
-            <param name="int_param" type="int" appearance="full" min="0" max="100" indent="0" gui-text="Age">0</param>
-            <param name="float_param" type="float" min="1" max="1000" gui-text="Height (meters):">1.5</param>
-            <param name="option_param" type="optiongroup" appearance="radio" gui-text="I like:">
-                <option value="choc">Chocolate</option>
-                <option value="shoe">Shoes</option>
-                <option value="oper">Opera</option>
-            </param>
+            <spacer/>
+            <label xml:space="preserve">
+                Wait delay seconds after configuring the printer.
+
+                Set Pen to the top position.
+            </label>
+            <param name="delay_after_config_enabled" type="bool" gui-text="Delay seconds enabled">true</param>
+            <param name="delay_after_config" type="int" min="1" max="60" gui-text="Delay seconds">10</param>
         </page>
         <page name="help" gui-text="Help">
             <label xml:space="preserve">
@@ -33,8 +39,6 @@
           </label>
         </page>
     </param>
-    <param name="bool_param" type="bool" gui-text="God powers?">true</param>
-
     <script>
         <command location="inx" interpreter="python">egg_bot_grbl.py</command>
     </script>

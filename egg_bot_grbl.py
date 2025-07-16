@@ -2,7 +2,12 @@
 
 import inkex  # import the inkex Module so that we can use the debug function below
 from inkex import Boolean
+
+from svg_to_gcode.svg_parser import parse_root, Transformation
+from svg_to_gcode.compiler import Compiler
+
 from grbl_sender import GRBLSender
+from svg_gcode import generate_custom_interface
 
 
 class EggBot(inkex.EffectExtension):  #This is your program
@@ -12,11 +17,14 @@ class EggBot(inkex.EffectExtension):  #This is your program
         add_argument("--usb_port", help="USB Port")
         add_argument("--tab", type=self.arg_method('tab'), default=self.tab_help,
                      help="Defines which tab is active")
-        add_argument("--color_param", type=int, help="An example option, put your options here")
-        add_argument("--int_param", type=int, help="An example option, put your options here")
-        add_argument("--float_param", type=float, help="An example option, put your options here")
-        add_argument("--option_param", help="An example option, put your options here")
-        add_argument("--bool_param", type=Boolean, help="An example option, put your options here")
+        add_argument("--pen_up_command", help="Pen Up Command")
+        add_argument("--pen_down_command", help="Pen Down Command")
+        add_argument("--directory", help="Directory")
+        add_argument("--filename", help="Filename")
+        add_argument("--filename_suffix", type=Boolean, help="Use numeric suffix")
+        add_argument("--delay_after_config_enabled", type=Boolean, help="Delay after config enabled")
+        add_argument("--delay_after_config", type=int, help="Delay after config in seconds")
+
 
     def effect(self):  # This is a function this is were you define what your program in going to do
         # Act 1: --------------------------------------------------------------------------------DISPLAY A TEXT SAYING "HELLO WORLD" IN A MESSAGE BOX
@@ -37,17 +45,42 @@ class EggBot(inkex.EffectExtension):  #This is your program
                              "    http://www.cnc-club.ru/gcodetoolsru")
         return
 
-    def tab_about(self):
-        return self.tab_help()
+    def tab_generate_gcode(self):
+        root = self.document.getroot()
 
-    def tab_preferences(self):
-        return self.tab_help()
+        custom_interface = generate_custom_interface(self.options.pen_up_command, self.options.pen_down_command)
 
-    def tab_options(self):
-        return self.tab_help()
+        # grbl_conf = open("grbl.conf").read().splitlines()
+        grbl_conf = [
+            '$32 = 0;',
+            '$100 = 22.857;',
+            '$101 = 21.68;',
+            '$110 = 1000;',
+            '$111 = 1000;',
+            '$120 = 50;',
+            '$121 = 50;',
+            '$130 = 140;',
+            '$131 = 41;',
+        ]
+        gcode_compiler = Compiler(custom_interface, movement_speed=1000, cutting_speed=300, pass_depth=1, custom_header=grbl_conf)
 
-    def tab_connection(self):
-        sender = GRBLSender('/dev/ttyUSB0', 115200, 1)
+        transformation = Transformation()
+
+        transformation.add_translation(-70, 20.5)
+        transformation.add_scale(0.1)
+
+
+
+        curves = parse_root(root, transform_origin=False, root_transformation=transformation,
+                            canvas_height=41)
+
+        gcode_compiler.append_curves(curves)
+        gcode_compiler.compile_to_file('output.gcode', passes=1)
+
+        return self.document
+
+    def tab_print(self):
+        sender = GRBLSender( self.options.usb_port, 115200, 1)
 
         try:
             # Подключение
