@@ -13,9 +13,11 @@
             <param name="pen_up_command" type="string" gui-text="Pen Up Command">M3 S50;</param>
             <param name="pen_down_command" type="string" gui-text="Pen Down Command">M3 S90;</param>
             <spacer/>
+            <param name="movement_speed" type="int" min="1" max="20000" gui-text="Movement speed">4000</param>
+            <param name="cutting_speed" type="int" min="1" max="20000" gui-text="Cutting speed">1000</param>
+            <spacer/>
             <param name="directory" type="path" gui-text="Output Directory" mode="folder">-- Choose Output Directory --</param>
             <param name="filename" type="string" gui-text="Filename">output.gcode</param>
-            <param name="filename_suffix" type="bool" gui-text="Add Numeric Suffix to Filename">true</param>
         </page>
         <page name="print" gui-text="Print G-Code">
             <label xml:space="preserve">

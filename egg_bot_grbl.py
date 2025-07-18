@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 
 import inkex  # import the inkex Module so that we can use the debug function below
 from inkex import Boolean
@@ -21,9 +22,10 @@ class EggBot(inkex.EffectExtension):  #This is your program
         add_argument("--pen_down_command", help="Pen Down Command")
         add_argument("--directory", help="Directory")
         add_argument("--filename", help="Filename")
-        add_argument("--filename_suffix", type=Boolean, help="Use numeric suffix")
         add_argument("--delay_after_config_enabled", type=Boolean, help="Delay after config enabled")
         add_argument("--delay_after_config", type=int, help="Delay after config in seconds")
+        add_argument("--movement_speed", type=int, help="Movement speed in mm/min")
+        add_argument("--cutting_speed", type=int, help="Cutting speed in mm/min")
 
 
     def effect(self):  # This is a function this is were you define what your program in going to do
@@ -46,28 +48,76 @@ class EggBot(inkex.EffectExtension):  #This is your program
         return
 
     def tab_generate_gcode(self):
+        try:
+            assert os.path.isdir(self.options.directory)
+        except:
+            inkex.utils.errormsg(f"{self.options.directory} is not a directory")
+            exit(2)
+
+        if self.options.filename:
+            filename = self.options.filename
+            if '.' not in filename:
+                filename += ".gcode"
+        else:
+            filename = "untitled.gcode"
+
+        output_path = os.path.join(self.options.directory, filename)
+
         root = self.document.getroot()
 
         custom_interface = generate_custom_interface(self.options.pen_up_command, self.options.pen_down_command)
 
         # grbl_conf = open("grbl.conf").read().splitlines()
-        grbl_conf = [
-            '$32 = 0;',
-            '$100 = 22.857;',
-            '$101 = 21.68;',
-            '$110 = 1000;',
-            '$111 = 1000;',
-            '$120 = 50;',
-            '$121 = 50;',
-            '$130 = 140;',
-            '$131 = 41;',
+        # grbl_conf = [
+        #     '$32 = 0;',
+        #     '$100 = 22.857',
+        #     '$101 = 21.68;',
+        #     '$110 = 10000;',
+        #     '$111 = 10000;',
+        #     '$120 = 50;',
+        #     '$121 = 50;',
+        #     '$130 = 140;',
+        #     '$131 = 41;',
+        # ]
+        custom_header = [
+            'G21',
         ]
-        gcode_compiler = Compiler(custom_interface, movement_speed=1000, cutting_speed=300, pass_depth=1, custom_header=grbl_conf)
+        gcode_compiler = Compiler(custom_interface, movement_speed=4000, cutting_speed=1000, pass_depth=1, custom_header=custom_header)
 
         transformation = Transformation()
 
-        transformation.add_translation(-70, 20.5)
-        transformation.add_scale(0.1)
+        transformation.add_translation(0, 0)
+
+        width = root.get("width")
+        height = root.get("height")
+        if width == None or height == None:
+            viewbox = root.get("viewBox")
+            if viewbox:
+                _, _, width, height = viewbox.split()
+
+        if width == None or height == None:
+            # raise ValueError("Unable to get width or height for the svg")
+            print("Unable to get width and height for the svg")
+            exit(1)
+
+        # If it's a string and pt or px is in it, remove it
+        if type(width) == str:
+            width = width.replace("pt", "")
+            width = width.replace("px", "")
+
+        if type(height) == str:
+            height = height.replace("pt", "")
+            height = height.replace("px", "")
+
+        scale_x = 140 / float(width)
+        scale_y = 41 / float(height)
+        scale = min(scale_x, scale_y)
+        if scale > 1:
+            scale = 1
+
+        inkex.utils.errormsg(f"Scale: {scale} width: {width} height: {height}")
+
+        transformation.add_scale(scale)
 
 
 
