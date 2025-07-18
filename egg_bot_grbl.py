@@ -125,7 +125,7 @@ class EggBot(inkex.EffectExtension):  #This is your program
                             canvas_height=41)
 
         gcode_compiler.append_curves(curves)
-        gcode_compiler.compile_to_file('output.gcode', passes=1)
+        gcode_compiler.compile_to_file(output_path, passes=1)
 
         return self.document
 
