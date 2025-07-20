@@ -97,7 +97,7 @@ class EggBot(inkex.EffectExtension):  #This is your program
 
         custom_header = [
             'G21;',
-            'G10 P0 L20 X0 Y22.5;',
+            'G10 P0 L20 X0 Y20.5;',
         ]
         gcode_compiler = Compiler(custom_interface,
                   movement_speed=self.options.movement_speed,
