@@ -5,11 +5,9 @@ import inkex  # import the inkex Module so that we can use the debug function be
 from inkex import Boolean
 
 from svg_to_gcode.svg_parser import parse_root, Transformation
-from svg_to_gcode.compiler import Compiler
 
 from grbl_sender import GRBLSender
-from svg_gcode import generate_custom_interface
-
+from svg_to_gcode.compiler import Compiler, interfaces
 
 class DocumentDimensions:
     def __init__(self, width, height):
@@ -18,6 +16,23 @@ class DocumentDimensions:
 
     def __str__(self):
         return f"Width: {self.width}, Height: {self.height}"
+
+def generate_custom_interface(laser_off_command, laser_power_command):
+    """Wrapper function for generating a Gcode interface with a custom laser power command"""
+
+    class CustomInterface(interfaces.Gcode):
+        """A Gcode interface with a custom laser power command"""
+
+        def __init__(self):
+            super().__init__()
+
+        def laser_off(self):
+            return f"{laser_off_command}"
+
+        def set_laser_power(self, _):
+            return f"{laser_power_command}"
+
+    return CustomInterface
 
 class EggBot(inkex.EffectExtension):  #This is your program
 
@@ -28,8 +43,8 @@ class EggBot(inkex.EffectExtension):  #This is your program
                      help="Defines which tab is active")
         add_argument("--pen_up_command", help="Pen Up Command")
         add_argument("--pen_down_command", help="Pen Down Command")
-        add_argument("--directory", help="Directory")
-        add_argument("--filename", help="Filename")
+        add_argument("--gcode_filepath", help="Filename of Gcode file")
+        add_argument("--log_filepath", help="Filename of log file")
         add_argument("--delay_after_config_enabled", type=Boolean, help="Delay after config enabled")
         add_argument("--delay_after_config", type=int, help="Delay after config in seconds")
         add_argument("--movement_speed", type=int, help="Movement speed in mm/min")
@@ -63,21 +78,6 @@ class EggBot(inkex.EffectExtension):  #This is your program
             height = float(height.replace("px", "").replace("pt", ""))
 
         return DocumentDimensions(width, height)
-    def get_file_name(self):
-        try:
-            assert os.path.isdir(self.options.directory)
-        except:
-            inkex.utils.errormsg(f"{self.options.directory} is not a directory")
-            exit(2)
-
-        if self.options.filename:
-            filename = self.options.filename
-            if '.' not in filename:
-                filename += ".gcode"
-        else:
-            filename = "untitled.gcode"
-
-        return os.path.join(self.options.directory, filename)
 
     def tab_help(self):
         inkex.utils.errormsg("Switch to another tab to run the extensions.\n"
@@ -91,22 +91,10 @@ class EggBot(inkex.EffectExtension):  #This is your program
 
     def tab_generate_gcode(self):
 
-        output_path = self.get_file_name()
+        output_path = self.options.gcode_filepath
         root = self.document.getroot()
         custom_interface = generate_custom_interface(self.options.pen_up_command, self.options.pen_down_command)
 
-        # grbl_conf = open("grbl.conf").read().splitlines()
-        # grbl_conf = [
-        #     '$32 = 0;',
-        #     '$100 = 22.857',
-        #     '$101 = 21.68;',
-        #     '$110 = 10000;',
-        #     '$111 = 10000;',
-        #     '$120 = 50;',
-        #     '$121 = 50;',
-        #     '$130 = 140;',
-        #     '$131 = 41;',
-        # ]
         custom_header = [
             'G21;',
             'G10 P0 L20 X0 Y22.5;',
@@ -145,9 +133,15 @@ class EggBot(inkex.EffectExtension):  #This is your program
         return self.document
 
     def tab_print(self):
-        output_path = self.get_file_name()
+        output_path = self.options.gcode_filepath
+        if not os.path.exists(output_path):
+            inkex.utils.errormsg("Файл не найден")
+            return 1
+        logfile = self.options.log_filepath
+        if not os.path.exists(logfile):
+            logfile = None
 
-        sender = GRBLSender( self.options.usb_port, 115200, 1)
+        sender = GRBLSender( self.options.usb_port, 115200, 1, logfile)
 
         try:
             # Подключение

@@ -9,31 +9,24 @@
         </effects-menu>
     </effect>
     <param name="tab" type="notebook">
-        <page name="generate_gcode" gui-text="Generate G-Code">
-            <param name="pen_up_command" type="string" gui-text="Pen Up Command">M3 S50;</param>
-            <param name="pen_down_command" type="string" gui-text="Pen Down Command">M3 S90;</param>
+        <page name="generate_gcode" gui-text="Генерировать файл G-Code">
+            <param name="pen_up_command" type="string" gui-text="Поднять маркер (команда)">M3 S80;</param>
+            <param name="pen_down_command" type="string" gui-text="Опустить маркер (команда)">M3 S90;</param>
             <spacer/>
-            <param name="movement_speed" type="int" min="1" max="20000" gui-text="Movement speed">4000</param>
-            <param name="cutting_speed" type="int" min="1" max="20000" gui-text="Cutting speed">1000</param>
+            <param name="movement_speed" type="int" min="1" max="20000" gui-text="Скорость перемещения">4000</param>
+            <param name="cutting_speed" type="int" min="1" max="20000" gui-text="Скорость рисования">1000</param>
             <spacer/>
-            <param name="directory" type="path" gui-text="Output Directory" mode="folder">-- Choose Output Directory --</param>
-            <param name="filename" type="string" gui-text="Filename">output.gcode</param>
+            <param name="gcode_filepath" type="path" gui-text="Результирующий файл G-Code" mode="file_new" filetypes="gcode">output.gcode</param>
         </page>
-        <page name="print" gui-text="Print G-Code">
+        <page name="print" gui-text="Печать файла G-Code">
             <label xml:space="preserve">
-                USB Port.
+                USB порт. В Windows например COM3, в Linux обычно /dev/ttyUSB0.
             </label>
-            <param name="usb_port" type="string" appearance="full" indent="2" gui-text="USB Port">/dev/ttyUSB0</param>
+            <param name="usb_port" type="string" appearance="full" gui-text="USB порт">/dev/ttyUSB0</param>
             <spacer/>
-            <label xml:space="preserve">
-                Wait delay seconds after configuring the printer.
-
-                Set Pen to the top position.
-            </label>
-            <param name="delay_after_config_enabled" type="bool" gui-text="Delay seconds enabled">true</param>
-            <param name="delay_after_config" type="int" min="1" max="60" gui-text="Delay seconds">10</param>
+            <param name="log_filepath" type="path" gui-text="Файла логов" mode="file_new" filetypes="log">output.log</param>
         </page>
-        <page name="help" gui-text="Help">
+        <page name="help" gui-text="Помощь">
             <label xml:space="preserve">
         This template provides extension writers with a basis to write their python based Inkscape extensions quickly and properly.
 
