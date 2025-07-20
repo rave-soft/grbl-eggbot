@@ -12,6 +12,8 @@
         <page name="generate_gcode" gui-text="Генерировать файл G-Code">
             <param name="pen_up_command" type="string" gui-text="Поднять маркер (команда)">M3 S80;</param>
             <param name="pen_down_command" type="string" gui-text="Опустить маркер (команда)">M3 S90;</param>
+            <param name="invert_y_axis" type="bool" gui-text="Инвертировать ось Y">false</param>
+
             <spacer/>
             <param name="movement_speed" type="int" min="1" max="20000" gui-text="Скорость перемещения">4000</param>
             <param name="cutting_speed" type="int" min="1" max="20000" gui-text="Скорость рисования">1000</param>

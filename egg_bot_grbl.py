@@ -45,8 +45,7 @@ class EggBot(inkex.EffectExtension):  #This is your program
         add_argument("--pen_down_command", help="Pen Down Command")
         add_argument("--gcode_filepath", help="Filename of Gcode file")
         add_argument("--log_filepath", help="Filename of log file")
-        add_argument("--delay_after_config_enabled", type=Boolean, help="Delay after config enabled")
-        add_argument("--delay_after_config", type=int, help="Delay after config in seconds")
+        add_argument("--invert_y_axis", type=Boolean, help="Invert Y Axis")
         add_argument("--movement_speed", type=int, help="Movement speed in mm/min")
         add_argument("--cutting_speed", type=int, help="Cutting speed in mm/min")
 
@@ -122,7 +121,7 @@ class EggBot(inkex.EffectExtension):  #This is your program
 
         transformation.add_scale(scale)
 
-        curves = parse_root(root, transform_origin=False, root_transformation=transformation, canvas_height=41)
+        curves = parse_root(root, transform_origin=not self.options.invert_y_axis, root_transformation=transformation, canvas_height=41)
 
         gcode_compiler.append_curves(curves)
 
