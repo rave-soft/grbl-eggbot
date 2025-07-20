@@ -11,6 +11,14 @@ from grbl_sender import GRBLSender
 from svg_gcode import generate_custom_interface
 
 
+class DocumentDimensions:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def __str__(self):
+        return f"Width: {self.width}, Height: {self.height}"
+
 class EggBot(inkex.EffectExtension):  #This is your program
 
     def add_arguments(self, pars):
@@ -29,25 +37,33 @@ class EggBot(inkex.EffectExtension):  #This is your program
 
 
     def effect(self):  # This is a function this is were you define what your program in going to do
-        # Act 1: --------------------------------------------------------------------------------DISPLAY A TEXT SAYING "HELLO WORLD" IN A MESSAGE BOX
-        # inkex.utils.debug("Hello World!!!123123")  # Create the message box with the Hello world message
-        # inkex.utils.debug("name: " + __name__)  # Create the message box with the Hello world message
-
         self.options.tab()
 
         return  # end of the program
 
-    def tab_help(self):
-        inkex.utils.errormsg("Switch to another tab to run the extensions.\n"
-                             "No changes are made if the preferences or help tabs are active.\n\n"
-                             "Tutorials, manuals and support can be found at\n"
-                             " English support forum:\n"
-                             "    http://www.cnc-club.ru/gcodetools\n"
-                             "and Russian support forum:\n"
-                             "    http://www.cnc-club.ru/gcodetoolsru")
-        return
+    def get_document_dimensions(self):
+        root = self.document.getroot()
+        width = root.get("width")
+        height = root.get("height")
 
-    def tab_generate_gcode(self):
+        if width is None or height is None:
+            view_box = root.get("viewBox")
+            if view_box:
+                _, _, width, height = view_box.split()
+
+        if width is None or height is None:
+            # raise ValueError("Unable to get width or height for the svg")
+            print("Unable to get width and height for the svg")
+            exit(1)
+
+        # Удаляем px/pt
+        if width and type(width) == str:
+            width = float(width.replace("px", "").replace("pt", ""))
+        if height and type(height) == str:
+            height = float(height.replace("px", "").replace("pt", ""))
+
+        return DocumentDimensions(width, height)
+    def get_file_name(self):
         try:
             assert os.path.isdir(self.options.directory)
         except:
@@ -61,10 +77,22 @@ class EggBot(inkex.EffectExtension):  #This is your program
         else:
             filename = "untitled.gcode"
 
-        output_path = os.path.join(self.options.directory, filename)
+        return os.path.join(self.options.directory, filename)
 
+    def tab_help(self):
+        inkex.utils.errormsg("Switch to another tab to run the extensions.\n"
+                             "No changes are made if the preferences or help tabs are active.\n\n"
+                             "Tutorials, manuals and support can be found at\n"
+                             " English support forum:\n"
+                             "    http://www.cnc-club.ru/gcodetools\n"
+                             "and Russian support forum:\n"
+                             "    http://www.cnc-club.ru/gcodetoolsru")
+        return
+
+    def tab_generate_gcode(self):
+
+        output_path = self.get_file_name()
         root = self.document.getroot()
-
         custom_interface = generate_custom_interface(self.options.pen_up_command, self.options.pen_down_command)
 
         # grbl_conf = open("grbl.conf").read().splitlines()
@@ -80,34 +108,23 @@ class EggBot(inkex.EffectExtension):  #This is your program
         #     '$131 = 41;',
         # ]
         custom_header = [
-            'G21',
+            'G21;',
+            'G10 P0 L20 X0 Y22.5;',
         ]
-        gcode_compiler = Compiler(custom_interface, movement_speed=4000, cutting_speed=1000, pass_depth=1, custom_header=custom_header)
+        gcode_compiler = Compiler(custom_interface,
+                  movement_speed=self.options.movement_speed,
+                  cutting_speed=self.options.cutting_speed,
+                  pass_depth=1,
+                  custom_header=custom_header
+        )
 
         transformation = Transformation()
 
         transformation.add_translation(0, 0)
 
-        width = root.get("width")
-        height = root.get("height")
-        if width == None or height == None:
-            viewbox = root.get("viewBox")
-            if viewbox:
-                _, _, width, height = viewbox.split()
-
-        if width == None or height == None:
-            # raise ValueError("Unable to get width or height for the svg")
-            print("Unable to get width and height for the svg")
-            exit(1)
-
-        # If it's a string and pt or px is in it, remove it
-        if type(width) == str:
-            width = width.replace("pt", "")
-            width = width.replace("px", "")
-
-        if type(height) == str:
-            height = height.replace("pt", "")
-            height = height.replace("px", "")
+        dimensions = self.get_document_dimensions()
+        width = dimensions.width
+        height = dimensions.height
 
         scale_x = 140 / float(width)
         scale_y = 41 / float(height)
@@ -115,21 +132,21 @@ class EggBot(inkex.EffectExtension):  #This is your program
         if scale > 1:
             scale = 1
 
-        inkex.utils.errormsg(f"Scale: {scale} width: {width} height: {height}")
-
         transformation.add_scale(scale)
 
-
-
-        curves = parse_root(root, transform_origin=False, root_transformation=transformation,
-                            canvas_height=41)
+        curves = parse_root(root, transform_origin=False, root_transformation=transformation, canvas_height=41)
 
         gcode_compiler.append_curves(curves)
+
+
+
         gcode_compiler.compile_to_file(output_path, passes=1)
 
         return self.document
 
     def tab_print(self):
+        output_path = self.get_file_name()
+
         sender = GRBLSender( self.options.usb_port, 115200, 1)
 
         try:
@@ -140,7 +157,7 @@ class EggBot(inkex.EffectExtension):  #This is your program
 
             status = sender.get_status()
             inkex.utils.errormsg(f"Статус GRBL: {status}")
-            if not sender.send_gcode_file('test_sample.gcode'):
+            if not sender.send_gcode_file(output_path):
                 inkex.utils.errormsg("Ошибка при отправке файла")
                 return 1
 
