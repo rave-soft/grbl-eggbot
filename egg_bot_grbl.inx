@@ -10,7 +10,7 @@
     </effect>
     <param name="tab" type="notebook">
         <page name="generate_gcode" gui-text="Генерировать файл G-Code">
-            <param name="pen_up_command" type="string" gui-text="Поднять маркер (команда)">M3 S80;</param>
+            <param name="pen_up_command" type="string" gui-text="Поднять маркер (команда)">M3 S75;</param>
             <param name="pen_down_command" type="string" gui-text="Опустить маркер (команда)">M3 S90;</param>
             <param name="invert_y_axis" type="bool" gui-text="Инвертировать ось Y">false</param>
             <spacer/>
