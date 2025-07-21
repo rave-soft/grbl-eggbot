@@ -48,6 +48,14 @@ class EggBot(inkex.EffectExtension):  #This is your program
         add_argument("--invert_y_axis", type=Boolean, help="Invert Y Axis")
         add_argument("--movement_speed", type=int, help="Movement speed in mm/min")
         add_argument("--cutting_speed", type=int, help="Cutting speed in mm/min")
+        add_argument("--x_circumference", type=int, help="X circumference")
+        add_argument("--y_circumference", type=int, help="Y circumference")
+        add_argument("--x_axis_maximum_rate", type=int, help="X-axis maximum rate, mm/min")
+        add_argument("--y_axis_maximum_rate", type=int, help="Y-axis maximum rate, mm/min")
+        add_argument("--x_axis_accel", type=int, help="X-axis acceleration, mm/sec^2")
+        add_argument("--y_axis_accel", type=int, help="Y-axis acceleration, mm/sec^2")
+        add_argument("--bed_width", type=int, help="X-axis maximum travel, millimeters")
+        add_argument("--bed_height", type=int, help="Y-axis maximum travel, millimeters")
 
 
     def effect(self):  # This is a function this is were you define what your program in going to do
@@ -94,9 +102,12 @@ class EggBot(inkex.EffectExtension):  #This is your program
         root = self.document.getroot()
         custom_interface = generate_custom_interface(self.options.pen_up_command, self.options.pen_down_command)
 
+        bed_width = int(self.options.bed_width)
+        bed_height = int(self.options.bed_height)
+
         custom_header = [
-            'G21;',
-            'G10 P0 L20 X0 Y20.5;',
+            'G21',
+            'G10 P0 L20 X0 Y%.2f' % (bed_height / 2),
         ]
         gcode_compiler = Compiler(custom_interface,
                   movement_speed=self.options.movement_speed,
@@ -113,8 +124,8 @@ class EggBot(inkex.EffectExtension):  #This is your program
         width = dimensions.width
         height = dimensions.height
 
-        scale_x = 140 / float(width)
-        scale_y = 41 / float(height)
+        scale_x = bed_width / float(width)
+        scale_y = bed_height / float(height)
         scale = min(scale_x, scale_y)
         if scale > 1:
             scale = 1
@@ -140,7 +151,7 @@ class EggBot(inkex.EffectExtension):  #This is your program
         if not os.path.exists(logfile):
             logfile = None
 
-        sender = GRBLSender( self.options.usb_port, 115200, 1, logfile)
+        sender = GRBLSender(self.options.usb_port, logfile=logfile)
 
         try:
             # Подключение
@@ -155,6 +166,96 @@ class EggBot(inkex.EffectExtension):  #This is your program
                 return 1
 
             inkex.utils.errormsg("Файл успешно отправлен")
+            return 0
+
+        except KeyboardInterrupt:
+            inkex.utils.errormsg("Прервано пользователем")
+            sender.emergency_stop()
+            return 1
+        except Exception as e:
+            inkex.utils.errormsg(f"Неожиданная ошибка: {e}")
+            return 1
+        finally:
+            sender.disconnect()
+
+    def tab_configure_grbl(self):
+
+        sender = GRBLSender(self.options.usb_port)
+
+        try:
+            # Подключение
+            if not sender.connect():
+                inkex.utils.errormsg("Не удалось подключиться к GRBL")
+                return 1
+
+            status = sender.get_status()
+            inkex.utils.errormsg(f"Статус GRBL: {status}")
+            lines = [
+                '$1 = 255',
+                '$32 = 0',
+                "$100 = %.3f" % (3200 / int(self.options.x_circumference)),
+                "$101 = %.3f" % (3200 / int(self.options.y_circumference)),
+                '$110 = %d' % int(self.options.x_axis_maximum_rate),
+                '$111 = %d' % int(self.options.y_axis_maximum_rate),
+                '$120 = %d' % int(self.options.x_axis_accel),
+                '$121 = %d' % int(self.options.y_axis_accel),
+                '$130 = %d' % int(self.options.bed_width),
+                '$131 = %d' % int(self.options.bed_height),
+            ]
+
+            if not sender.send_gcode_lines(lines):
+                inkex.utils.errormsg("Ошибка при отправке конфигурации")
+                return 1
+
+            inkex.utils.errormsg("Конфигурация успешно установлена")
+            return 0
+
+        except KeyboardInterrupt:
+            inkex.utils.errormsg("Прервано пользователем")
+            sender.emergency_stop()
+            return 1
+        except Exception as e:
+            inkex.utils.errormsg(f"Неожиданная ошибка: {e}")
+            return 1
+        finally:
+            sender.disconnect()
+
+    def tab_calibrate_grbl(self):
+
+        sender = GRBLSender(self.options.usb_port)
+
+        try:
+            # Подключение
+            if not sender.connect():
+                inkex.utils.errormsg("Не удалось подключиться к GRBL")
+                return 1
+
+            status = sender.get_status()
+            inkex.utils.errormsg(f"Статус GRBL : {status}")
+            height_center =  int(self.options.bed_height) / 2
+            lines = [
+                'G21',
+                'G90',
+                'G17',
+                'G94',
+                'M3 S70',
+                'G10 P0 L20 X0 Y%.3f' % height_center,
+                'G0 X0 Y0',
+                self.options.pen_down_command,
+                'G1 X0 Y0 F%d' % int(self.options.cutting_speed),
+                'G1 Y%d' % int(self.options.bed_height),
+                'G1 X%d' % int(self.options.bed_width),
+                'G1 Y0',
+                'G1 X0',
+                'G0 X0 Y%.3f' % height_center,
+                self.options.pen_up_command,
+            ]
+
+            if not sender.send_gcode_lines(lines):
+                inkex.utils.errormsg("Ошибка при отправке команд")
+                return 1
+
+            inkex.utils.errormsg("Команды успешно отправлены")
             return 0
 
         except KeyboardInterrupt:

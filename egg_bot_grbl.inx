@@ -27,6 +27,27 @@
             <spacer/>
             <param name="log_filepath" type="path" gui-text="Файла логов" mode="file_new" filetypes="log">output.log</param>
         </page>
+        <page name="configure_grbl" gui-text="Конфигурация GRBL">
+            <param name="usb_port" type="string" appearance="full" gui-text="USB порт">/dev/ttyUSB0</param>
+            <spacer/>
+            <param name="x_circumference" type="int" min="1" max="500" gui-text="Длина окружности X">144</param>
+            <param name="y_circumference" type="int" min="1" max="500" gui-text="Длина окружности Y">150</param>
+            <param name="bed_width" type="int" min="1" max="500" gui-text="Ширина кровати">144</param>
+            <param name="bed_height" type="int" min="1" max="500" gui-text="Высота кровати">42</param>
+            <spacer/>
+            <param name="x_axis_accel" type="int" min="1" max="500" gui-text="Ускорение по оси X">50</param>
+            <param name="y_axis_accel" type="int" min="1" max="500" gui-text="Ускорение по оси Y">50</param>
+            <spacer/>
+            <param name="x_axis_maximum_rate" type="int" min="1" max="100000" gui-text="Максимальная скорость перемещения по оси X">10000</param>
+            <param name="y_axis_maximum_rate" type="int" min="1" max="100000" gui-text="Максимальная скорость перемещения по оси Y">10000</param>
+        </page>
+        <page name="calibrate_grbl" gui-text="Калибровка GRBL">
+            <param name="usb_port" type="string" appearance="full" gui-text="USB порт">/dev/ttyUSB0</param>
+            <spacer/>
+            <label xml:space="preserve">
+                Установите маркер в устройство и нажмите кнопку "Применить".
+            </label>
+        </page>
         <page name="help" gui-text="Помощь">
             <label xml:space="preserve">
         This template provides extension writers with a basis to write their python based Inkscape extensions quickly and properly.

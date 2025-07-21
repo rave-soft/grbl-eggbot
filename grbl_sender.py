@@ -178,7 +178,25 @@ class GRBLSender:
                 if not self.wait_for_ok():
                     return False
 
-            # Отправляем команды построчно
+
+            if self.send_gcode_lines(lines):
+                return True
+
+        except Exception as e:
+            self.logger.error(f"Ошибка при отправке файла: {e}")
+            return False
+
+    def send_gcode_lines(self, lines: list[str]) -> bool:
+        """
+        Отправка команд в GRBL
+
+        Args:
+            lines: Команды в виде списка строк
+
+        Returns:
+            True если успешно, False в случае ошибки
+        """
+        try:
             line_count = 0
             for line_num, line in enumerate(lines, 1):
                 line = line.strip()
@@ -211,11 +229,11 @@ class GRBLSender:
                 if line_count % 100 == 0:
                     self.logger.info(f"Отправлено строк: {line_count}")
 
-            self.logger.info(f"Печать завершена. Всего отправлено строк: {line_count}")
+            self.logger.info(f"Отправка завершена. Всего отправлено строк: {line_count}")
             return True
 
         except Exception as e:
-            self.logger.error(f"Ошибка при отправке файла: {e}")
+            self.logger.error(f"Ошибка при отправке команд: {e}")
             return False
 
     def get_status(self) -> str:
