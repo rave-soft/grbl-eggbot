@@ -99,11 +99,16 @@ class EggBot(inkex.EffectExtension):  #This is your program
             'G21',
             'G10 P0 L20 X0 Y%.2f' % (bed_height / 2),
         ]
+        custom_footer = [
+            self.options.pen_up_command,
+            'G10 P0 L20 X0 Y%.2f' % (bed_height / 2),
+        ]
         gcode_compiler = Compiler(custom_interface,
                   movement_speed=self.options.movement_speed,
                   cutting_speed=self.options.cutting_speed,
                   pass_depth=1,
-                  custom_header=custom_header
+                  custom_header=custom_header,
+                  custom_footer=custom_footer
         )
 
         transformation = Transformation()

@@ -20,26 +20,23 @@
             <param name="gcode_filepath" type="path" gui-text="Результирующий файл G-Code" mode="file_new" filetypes="gcode">output.gcode</param>
         </page>
         <page name="print" gui-text="Печать файла G-Code">
-            <label xml:space="preserve">
-                USB порт. В Windows например COM3, в Linux обычно /dev/ttyUSB0.
-            </label>
-            <param name="usb_port" type="string" appearance="full" gui-text="USB порт">/dev/ttyUSB0</param>
+            <param name="usb_port" type="string" appearance="full" gui-text="USB порт" gui-description="Пример COM3 (Windows) /dev/ttyUSB0(Linux)">/dev/ttyUSB0</param>
             <spacer/>
             <param name="log_filepath" type="path" gui-text="Файла логов" mode="file_new" filetypes="log">output.log</param>
         </page>
         <page name="configure_grbl" gui-text="Конфигурация GRBL">
             <param name="usb_port" type="string" appearance="full" gui-text="USB порт">/dev/ttyUSB0</param>
             <spacer/>
-            <param name="x_circumference" type="int" min="1" max="500" gui-text="Длина окружности X">144</param>
-            <param name="y_circumference" type="int" min="1" max="500" gui-text="Длина окружности Y">150</param>
-            <param name="bed_width" type="int" min="1" max="500" gui-text="Ширина кровати">144</param>
-            <param name="bed_height" type="int" min="1" max="500" gui-text="Высота кровати">42</param>
+            <param name="x_circumference" type="int" min="1" max="500" gui-text="Длина окружности X, (мм)">144</param>
+            <param name="y_circumference" type="int" min="1" max="500" gui-text="Длина окружности Y, (мм)">150</param>
+            <param name="bed_width" type="int" min="1" max="500" gui-text="Ширина кровати (область печати), (мм)">144</param>
+            <param name="bed_height" type="int" min="1" max="500" gui-text="Высота кровати (область печати), (мм)">42</param>
             <spacer/>
-            <param name="x_axis_accel" type="int" min="1" max="500" gui-text="Ускорение по оси X">50</param>
-            <param name="y_axis_accel" type="int" min="1" max="500" gui-text="Ускорение по оси Y">50</param>
+            <param name="x_axis_accel" type="int" min="1" max="500" gui-text="Ускорение по оси X (мм/сек^2)">50</param>
+            <param name="y_axis_accel" type="int" min="1" max="500" gui-text="Ускорение по оси Y (мм/сек^2)">50</param>
             <spacer/>
-            <param name="x_axis_maximum_rate" type="int" min="1" max="100000" gui-text="Максимальная скорость перемещения по оси X">10000</param>
-            <param name="y_axis_maximum_rate" type="int" min="1" max="100000" gui-text="Максимальная скорость перемещения по оси Y">10000</param>
+            <param name="x_axis_maximum_rate" type="int" min="1" max="100000" gui-text="Максимальная скорость перемещения по оси X, (мм/мин)">10000</param>
+            <param name="y_axis_maximum_rate" type="int" min="1" max="100000" gui-text="Максимальная скорость перемещения по оси Y, (мм/мин)">10000</param>
         </page>
         <page name="calibrate_grbl" gui-text="Калибровка GRBL">
             <param name="usb_port" type="string" appearance="full" gui-text="USB порт">/dev/ttyUSB0</param>
