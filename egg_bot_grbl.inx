@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension translationdomain="egg_bot_grbl" xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <name>Control</name>
+    <name>Eggbot GRBL Control</name>
     <id>org.inkscape.egg-bot-grbl.control</id>
     <effect show-stderr="true" needs-live-preview="false">
         <object-type>path</object-type>
@@ -47,13 +47,6 @@
             <label xml:space="preserve">
                 Установите маркер в устройство и нажмите кнопку "Применить".
             </label>
-        </page>
-        <page name="help" gui-text="Помощь">
-            <label xml:space="preserve">
-        This template provides extension writers with a basis to write their python based Inkscape extensions quickly and properly.
-
-        This testing help text can be changed to help users of the extension.
-          </label>
         </page>
     </param>
     <script>

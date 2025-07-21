@@ -39,7 +39,7 @@ class EggBot(inkex.EffectExtension):  #This is your program
     def add_arguments(self, pars):
         add_argument = pars.add_argument
         add_argument("--usb_port", help="USB Port")
-        add_argument("--tab", type=self.arg_method('tab'), default=self.tab_help,
+        add_argument("--tab", type=self.arg_method('tab'), default=self.tab_generate_gcode,
                      help="Defines which tab is active")
         add_argument("--pen_up_command", help="Pen Up Command")
         add_argument("--pen_down_command", help="Pen Down Command")
@@ -85,16 +85,6 @@ class EggBot(inkex.EffectExtension):  #This is your program
             height = float(height.replace("px", "").replace("pt", ""))
 
         return DocumentDimensions(width, height)
-
-    def tab_help(self):
-        inkex.utils.errormsg("Switch to another tab to run the extensions.\n"
-                             "No changes are made if the preferences or help tabs are active.\n\n"
-                             "Tutorials, manuals and support can be found at\n"
-                             " English support forum:\n"
-                             "    http://www.cnc-club.ru/gcodetools\n"
-                             "and Russian support forum:\n"
-                             "    http://www.cnc-club.ru/gcodetoolsru")
-        return
 
     def tab_generate_gcode(self):
 
