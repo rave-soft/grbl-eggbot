@@ -101,7 +101,7 @@ class EggBot(inkex.EffectExtension):  #This is your program
         ]
         custom_footer = [
             self.options.pen_up_command,
-            'G10 P0 L20 X0 Y%.2f' % (bed_height / 2),
+            'G1 X0 Y%.2f' % (bed_height / 2),
         ]
         gcode_compiler = Compiler(custom_interface,
                   movement_speed=self.options.movement_speed,
