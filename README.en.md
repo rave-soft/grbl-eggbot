@@ -28,9 +28,14 @@ This extension allows converting SVG files into G-Code and sending them to a GRB
    - Log file path (optional): Specify a path to save logs.
 7. Click `Apply`.
 
+## Connection
+Go to the Connection tab and set:
+- **GRBL Controller USB Port:** Specify the port your GRBL controller is connected to.
+- Click `Apply`.
+- If the connection is successful, a modal dialog will display the status and configuration of the GRBL controller.
+
 ## GRBL Configuration
 Go to the `GRBL Configuration` tab and set:
-  - **GRBL controller USB port:** Specify the port your GRBL controller is connected to.
   - **X/Y Circumference:** Circumference for X and Y axes (affects step calculations).
   - **Bed Width/Height:** Print area size in X and Y axes (mm).
   - **X/Y Axis Acceleration:** Acceleration for X and Y axes (mm/sec^2).
@@ -39,9 +44,7 @@ Click `Apply`.
 
 ## Calibration
 1. Select the `Calibration` tab.
-2. Configure:
-   - GRBL controller USB port: COM3 (Windows) /dev/ttyUSB0 (Linux)
-3. Click Apply.
+2. Click Apply.
    During calibration, GRBL commands are sent to draw the print area boundaries.
    Based on the result, you can adjust pen up/down commands, area boundaries, and drawing speed.
 
@@ -60,12 +63,12 @@ Click `Apply`.
 ### Example 2: Sending G-Code to Controller
 1. Make sure your GRBL controller is connected to your computer.
 2. Open Inkscape and go to `Extensions -> Eggbot GRBL`.
-3. Select the `Print G-Code File` tab.
-4. Configure:
-   - GRBL controller USB port: `COM3` (Windows) `/dev/ttyUSB0` (Linux)
-   - Path to G-Code file: `/path/to/output.gcode`
-   - Path to log file: `/path/to/output.log` (optional)
-5. Click Apply.
+3. Select the `Connection` tab.
+4. Configure: GRBL controller USB port: `COM3` (Windows) `/dev/ttyUSB0` (Linux)
+5. Click `Apply`. And ensure the connection is successful.
+6. Select the `Print G-Code File` tab.
+7. Configure `Path to log file`: `/path/to/output.log` (optional)
+8. Click `Apply`.
 
 ## Tips and Recommendations
 - The extension allows sending G-Code directly to the GRBL controller, but for convenience, it is better to use other G-Code printing applications, such as Universal G-Code Sender.
