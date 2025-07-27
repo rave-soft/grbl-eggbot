@@ -136,6 +136,32 @@ class EggBot(inkex.EffectExtension):  #This is your program
         gcode_compiler.compile_to_file(output_path, passes=1)
 
         return self.document
+    def tab_connection(self):
+        sender = GRBLSender(self.options.usb_port)
+
+        try:
+            # Подключение
+            if not sender.connect():
+                inkex.utils.errormsg("Не удалось подключиться к GRBL")
+                return 1
+
+            status = sender.get_status()
+            inkex.utils.errormsg(f"Статус GRBL:\n {status}")
+
+            configuration = sender.get_configuration()
+            inkex.utils.errormsg(f"Конфигурация GRBL:\n {configuration}")
+
+            return 0
+
+        except KeyboardInterrupt:
+            inkex.utils.errormsg("Прервано пользователем")
+            sender.emergency_stop()
+            return 1
+        except Exception as e:
+            inkex.utils.errormsg(f"Неожиданная ошибка: {e}")
+            return 1
+        finally:
+            sender.disconnect()
 
     def tab_print(self):
         output_path = self.options.gcode_filepath
@@ -154,8 +180,6 @@ class EggBot(inkex.EffectExtension):  #This is your program
                 inkex.utils.errormsg("Не удалось подключиться к GRBL")
                 return 1
 
-            status = sender.get_status()
-            inkex.utils.errormsg(f"Статус GRBL: {status}")
             if not sender.send_gcode_file(output_path):
                 inkex.utils.errormsg("Ошибка при отправке файла")
                 return 1

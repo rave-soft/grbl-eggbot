@@ -241,6 +241,11 @@ class GRBLSender:
         self.send_command("?")
         return self.read_response()
 
+    def get_configuration(self) -> str:
+        """Получение конфигурации GRBL"""
+        self.send_command("$$")
+        return self.read_response()
+
     def emergency_stop(self):
         """Экстренная остановка"""
         self.send_command("!")
