@@ -14,8 +14,8 @@
             <param name="pen_down_command" type="string" gui-text="Опустить маркер (команда)">M3 S90;</param>
             <param name="invert_y_axis" type="bool" gui-text="Инвертировать ось Y">false</param>
             <spacer/>
-            <param name="movement_speed" type="int" min="1" max="20000" gui-text="Скорость перемещения">4000</param>
-            <param name="cutting_speed" type="int" min="1" max="20000" gui-text="Скорость рисования">1000</param>
+            <param name="movement_speed" type="int" min="1" max="20000" gui-text="Скорость перемещения (мм/мин)">4000</param>
+            <param name="cutting_speed" type="int" min="1" max="20000" gui-text="Скорость рисования (мм/мин)">1000</param>
             <spacer/>
             <param name="gcode_filepath" type="path" gui-text="Результирующий файл G-Code" mode="file_new" filetypes="gcode">output.gcode</param>
         </page>
